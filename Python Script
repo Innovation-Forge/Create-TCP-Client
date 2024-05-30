@@ -1,0 +1,83 @@
+# We need the socket library to create network connections.
+import socket
+# The sys library will let us exit the program if we encounter an error.
+import sys
+
+# Function to connect to the server.
+def connect_to_server(hostname, port):
+    # Creating a new socket for the internet connection, using TCP.
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    
+    # Use our socket to connect to the server's address and the specified port.
+    client_socket.connect((hostname, port))
+    
+    # Once connected, return the socket we created.
+    return client_socket
+
+# Function for sending messages to the server.
+def send_messages(client_socket):
+    # A list of messages to send. Each is a short sentence.
+    messages = [
+        "Hello, server!",
+        "How are you today?",
+        "It's a nice day for coding.",
+        "Python is fun.",
+        "I'm learning about networks.",
+        "What's your favorite protocol?",
+        "TCP is reliable.",
+        "UDP is faster.",
+        "Have a great day!",
+        "Goodbye, server!"
+    ]
+    
+    # Loop through each message in our list.
+    for message in messages:
+        # Show in the console which message we're sending.
+        print(f"Sending: {message}")
+        
+        # Send the message to the server. We need to encode it to bytes.
+        client_socket.sendall(message.encode('utf-8'))
+        
+        # Wait for and then receive the server's response, which should be an MD5 hash.
+        response = client_socket.recv(2048)
+        # Decode the server's response from bytes back into a string.
+        md5_hash = response.decode('utf-8')
+        
+        # Show both the message we sent and the MD5 hash we received from the server.
+        print(f"Original message: {message}")
+        print(f"MD5 Hash received: {md5_hash}\n")
+
+# The main function where everything starts.
+def main():
+    # Print statements to let the user know the client application is starting.
+    print("Client Application")
+    print("Establishing a connection to the server")
+    print("Available on the same host using PORT 5555")
+    
+    # The server is listening on port 5555, which we need to connect to.
+    PORT = 5555
+    
+    try:
+        # Get the name of the local machine where this script is running.
+        localHost = socket.gethostname()
+        
+        # Connect to the server using our function.
+        client_socket = connect_to_server(localHost, PORT)
+        # Print a success message once connected.
+        print(f"\nSuccessfully connected to: {localHost} on PORT {PORT}")
+        
+        # Now send messages to the server.
+        send_messages(client_socket)
+        
+        # Don't forget to close the socket when we're done.
+        client_socket.close()
+    
+    except Exception as err:
+        # If any error occurs, print it out and exit the program.
+        print(f"An error occurred: {err}")
+        sys.exit(1)
+
+# Check if this script is being executed directly, which means it's not being imported by another script.
+if __name__ == '__main__':
+    # If so, run the main function.
+    main()
